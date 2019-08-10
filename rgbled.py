@@ -4,6 +4,19 @@ from neopixel import NeoPixel
 from apa102 import APA102
 
 def rgb_to_hsv(rgb_color):
+    """Converts colors from the RGB color space to the HSV color space.
+
+    Parameters
+    ----------
+    rgb_color : tuple (r, g, b)
+        Color in the RGB color space
+
+    Returns
+    -------
+    tuple (h, s, v)
+        Color in the HSV color space
+
+    """
     (r, g, b) = rgb_color
     r = float(1 / 255 * r)
     g = float(1 / 255 * g)
@@ -28,6 +41,19 @@ def rgb_to_hsv(rgb_color):
     return h, s, v
 
 def hsv_to_rgb(hsv_color):
+    """Converts colors from the HSV color space to the RGB color space.
+
+    Parameters
+    ----------
+    hsv_color : tuple (h, s, v)
+        Color in the HSV color space
+
+    Returns
+    -------
+    tuple (r, g, b)
+        Color in the RGB color space
+
+    """
     (h, s, v) = hsv_color
     i = math.floor(h*6)
     f = h*6 - i
@@ -72,6 +98,24 @@ class RgbLed():
     '''LED agnostic RGB LED driver'''
 
     def __init__(self, count, data, clock=None, apa102c=False):
+        """Initializes the LED driver
+
+        Parameters
+        ----------
+        count : int
+            Required
+            Number of LEDs in the LED strip/matrix
+        data : int
+            Required
+            Pin of the Data Line
+        clock : int
+            Optional
+            Pin for the clock Line.
+            Used only by the APA102
+        apa102c : bool
+            Optional
+            Used only by the APA102C to reorder the color sequence
+        """
         data_pin = Pin(data, Pin.OUT)
         self.neopixel = True
         if clock is None:
@@ -85,6 +129,21 @@ class RgbLed():
         self.count = count
 
     def _set_led(self, color, intensity, pos):
+        """Internal method to set individual LEDs to a coloir
+
+        Parameters
+        ----------
+        color : tuple (r, g, b) or string
+            Required
+            Color of the LED in the RGB color space
+            Either as (r, g, b) tuple or as a Hexadecimal string 'AA55CC'
+        intensity : float
+            Required
+            Intensity of the color/LED from 0 to 1
+        pos : int
+            Required
+            Position of the LED in the LED strip/matrix
+        """
         if type(color) is str:
             color = hex_to_rgb(color)
         if self.neopixel:
@@ -99,16 +158,48 @@ class RgbLed():
         self.leds[pos] = color
 
     def _color_wheel(self, pos, intensity=1.0):
+        """Short summary.
+
+        Parameters
+        ----------
+        pos : int
+            Required
+            Position of the color in the HSV color wheel
+            from 0 to 360 degrees
+        intensity : float
+            Intensity of the color/LED from 0 to 1
+
+        Returns
+        -------
+        tuple (r, g, b)
+            Color in the RGB color space
+
+        """
+        if pos > 360:
+            pos = pos - 360
         h = pos / 360
         return hsv_to_rgb((h, 1, intensity))
 
     def clear(self):
-        '''Clears all LEDs.'''
+        """Clears all LEDs and sets them to Black"""
         for n in range(self.count):
             self._set_led(COLOR_BLACK, 0, n)
         self.leds.write()
 
     def set_led(self, color, intensity=1.0, pos=None):
+        """Set one or all LEDs to a color.
+
+        Parameters
+        ----------
+        color : tuple (r, g, b) or string
+            Required
+            Color of the LED in the RGB color space
+            Either as (r, g, b) tuple or as a Hexadecimal string 'AA55CC'
+        intensity : float
+            Intensity of the color/LED from 0 to 1
+        pos : int
+            Position of the LED in the LED strip/matrix
+        """
         if pos:
             self._set_led(color, intensity, pos)
         else:
@@ -117,10 +208,67 @@ class RgbLed():
         self.leds.write()
 
     def color_cycle(self, wait=10, loop=4, intensity=1.0):
+        """Cycles all LEDs through the HSV color space
+
+        Parameters
+        ----------
+        wait : int
+            How long to wait between refreshing the LEDs
+        loop : int
+            How many times the cycle is looped
+        intensity : float
+            Intensity of the color/LED from 0 to 1
+        """
         for i in range(loop):
             for j in range(360):
                 for k in range(self.count):
-                    index = (j * 360 // self.count) + k
-                    self._set_led(self._color_wheel(index), intensity, k)
+                    pos = j + 10 * k
+                    self._set_led(self._color_wheel(pos), intensity, k)
                 self.leds.write()
                 time.sleep_ms(wait)
+
+    def cycle(self, color, intensity=1.0, wait=10, loop=4, invert=False):
+        """Cycles a single LED down the LED strip/matrix. The LED is either
+           turned off (color black), while all other LEDs are set to a color
+           or all LEDs are turned off with only one color.add()
+
+        Parameters
+        ----------
+        color : tuple (r, g, b) or string
+            Required
+            Color of the LED in the RGB color space
+            Either as (r, g, b) tuple or as a Hexadecimal string 'AA55CC'
+        intensity : float
+            Intensity of the color/LED from 0 to 1
+        wait : int
+            How long to wait between refreshing the LEDs
+        loop : int
+            How many times the cycle is looped
+        invert : bool
+            Inverts the display
+
+        Returns
+        -------
+        type
+            Description of returned object.
+
+        """
+        clear = COLOR_BLACK
+        clear_intensity = 0
+        if invert:
+            clear = color
+            clear_intensity = intensity
+            color = COLOR_BLACK
+            intensity = 0
+        for i in range(loop * self.count):
+            for j in range(self.count):
+                if invert:
+                    self._set_led(color, intensity, j)
+                else:
+                    self._set_led(COLOR_BLACK, 0, j)
+            if invert:
+                self._set_led(COLOR_BLACK, 0, i % self.count)
+            else:
+                self._set_led(color, intensity, i % self.count)
+            self.leds.write()
+            time.sleep_ms(wait)
