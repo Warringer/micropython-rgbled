@@ -3,7 +3,7 @@ import time
 
 def pause():
     time.sleep(1)
-    
+
 def clear_pause():
     pause()
     led.clear()
@@ -28,7 +28,6 @@ led.clear()
 pause
 
 print("Testing setting LEDs")
-'''
 print("Testing setting single LED")
 led.set_led(color, pos=3)
 clear_pause()
@@ -53,7 +52,7 @@ clear_pause()
 print("Testing inverted cycle")
 led.cycle(color, wait=20, invert=True)
 clear_pause()
-'''
+
 print("Testing fade")
 led.fade(color)
 clear_pause()
@@ -64,4 +63,12 @@ clear_pause()
 
 print("Testing fade out")
 led.fade(color, fadein=False)
-clear_pause
+clear_pause()
+
+print("Testing sweep")
+led.sweep(color)
+clear_pause()
+
+print("Testing inverse sweep")
+led.sweep(color, invert=True)
+clear_pause()

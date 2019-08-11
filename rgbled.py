@@ -207,19 +207,19 @@ class RgbLed():
                 self._set_led(color, intensity, n)
         self.leds.write()
 
-    def color_cycle(self, wait=10, loop=4, intensity=1.0):
+    def color_cycle(self, wait=10, repeats=4, intensity=1.0):
         """Cycles all LEDs through the HSV color space
 
         Parameters
         ----------
         wait : int
             How long to wait between refreshing the LEDs
-        loop : int
+        repeats : int
             How many times the cycle is looped
         intensity : float
             Intensity of the color/LED from 0 to 1
         """
-        for i in range(loop):
+        for i in range(repeats):
             for j in range(360):
                 for k in range(self.count):
                     pos = j + 10 * k
@@ -227,7 +227,7 @@ class RgbLed():
                 self.leds.write()
                 time.sleep_ms(wait)
 
-    def cycle(self, color, intensity=1.0, wait=10, loop=4, invert=False):
+    def cycle(self, color, intensity=1.0, wait=10, repeats=4, invert=False):
         """Cycles a single LED down the LED strip/matrix. The LED is either
            turned off (color black), while all other LEDs are set to a color
            or all LEDs are turned off with only one color.add()
@@ -244,12 +244,12 @@ class RgbLed():
             Number of LEDs that cycle
         wait : int
             How long to wait between refreshing the LEDs
-        loop : int
+        repeats : int
             How many times the cycle is looped
         invert : bool
             Inverts the display
         """
-        for i in range(loop * self.count):
+        for i in range(repeats * self.count):
             for j in range(self.count):
                 if invert:
                     self._set_led(color, intensity, j)
@@ -262,7 +262,7 @@ class RgbLed():
             self.leds.write()
             time.sleep_ms(wait)
 
-    def fade(self, color, wait=10, loop=4, pos=None, fadein=True, fadeout=True):
+    def fade(self, color, wait=10, repeats=4, pos=None, fadein=True, fadeout=True):
         """Fades one or more LEDs in and out.
 
         Parameters
@@ -275,7 +275,7 @@ class RgbLed():
             Number of LEDs that cycle
         wait : int
             How long to wait between refreshing the LEDs
-        loop : int
+        repeats : int
             How many times the cycle is looped
         pos : int
             Position of the LED in the LED strip/matrix
@@ -284,7 +284,7 @@ class RgbLed():
         fadeout : bool
                 Should the LED fade out
         """
-        for i in range(loop):
+        for i in range(repeats):
             if fadein:
                 for j in range(32):
                     intensity = 1 / 32 * j
@@ -296,3 +296,4 @@ class RgbLed():
                     self.set_led(color, intensity, pos)
                     time.sleep_ms(wait)
                 self.clear()
+
