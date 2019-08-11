@@ -2,11 +2,16 @@ import rgbled
 import time
 
 def pause():
-    time.sleep(500)
+    time.sleep(1)
+    
+def clear_pause():
+    pause()
+    led.clear()
+    pause()
 
 data_pin = 0 # ESP8266 GPIO0
 # clock_pin = 1 # ESP8266 GPIO1 Only for APA102
-led_count = 8 # number of LEDs
+led_count = 16 # number of LEDs
 
 color = rgbled.COLOR_CYAN
 intensity = 0.1
@@ -23,40 +28,40 @@ led.clear()
 pause
 
 print("Testing setting LEDs")
-
+'''
 print("Testing setting single LED")
 led.set_led(color, pos=3)
-pause()
-led.clear()
-pause()
+clear_pause()
 
 print("Testing setting all LEDs")
 led.set_led(color)
-pause()
-led.clear()
-pause()
+clear_pause()
 
 print("Testing LED intensity")
 led.set_led(color, intensity=intensity)
-pause()
-led.clear()
-pause()
+clear_pause()
 
 print("Testing color_cycle")
-led.color_cycle()
-pause()
-led.clear()
-pause()
+led.color_cycle(wait=1)
+clear_pause()
 
 print("Testing cycle")
 print("Testing normal cycle")
-led.cycle(color)
-pause()
-led.clear()
-pause()
+led.cycle(color, wait=20)
+clear_pause()
 
 print("Testing inverted cycle")
-led.cycle(color, invert=True)
-pause()
-led.clear()
-pause()
+led.cycle(color, wait=20, invert=True)
+clear_pause()
+'''
+print("Testing fade")
+led.fade(color)
+clear_pause()
+
+print("Testing fade in")
+led.fade(color, fadeout=False)
+clear_pause()
+
+print("Testing fade out")
+led.fade(color, fadein=False)
+clear_pause
